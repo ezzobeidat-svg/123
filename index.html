@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ClassFlow | ניהול ובקשות שיעורים</title>
+
+<!-- أيقونة الموقع وإعدادات إضافته لشاشة الهاتف الرئيسية -->
+<link rel="manifest" href="manifestteacher.json">
+<link rel="icon" type="image/png" sizes="32x32" href="iconsteacher/icon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="iconsteacher/icon-180.png">
+<link rel="apple-touch-icon" sizes="167x167" href="iconsteacher/icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="iconsteacher/icon-152.png">
+<meta name="theme-color" content="#0B132B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ClassFlow">
+
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Heebo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet">
+
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-dark: #0B132B;
+  --bg-card: rgba(28, 37, 65, 0.65);
+  --bg-card-hover: rgba(28, 37, 65, 0.9);
+  --border-light: rgba(255, 255, 255, 0.08);
+  --border-accent: rgba(77, 208, 225, 0.3);
+  
+  --text-main: #F4F6F9;
+  --text-sub: #9BABC5;
+  --text-muted: #5C6B84;
+
+  --primary: #3A86FF;
+  --primary-gradient: linear-gradient(135deg, #4361EE 0%, #3A86FF 100%);
+  --success: #10B981;
+  --success-bg: rgba(16, 185, 129, 0.12);
+  --warning: #FFB703;
+  --warning-bg: rgba(255, 183, 3, 0.12);
+  --danger: #FF006E;
+  --danger-bg: rgba(255, 0, 110, 0.12);
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --shadow-glow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+body {
+  font-family: 'Heebo', sans-serif;
+  background-color: var(--bg-dark);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(67, 97, 238, 0.18) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(58, 134, 255, 0.12) 0px, transparent 50%);
+  background-attachment: fixed;
+  color: var(--text-main);
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+.fade-in { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+/* ── LAYOUT ── */
+#app {
+  display: block;
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 3rem 1rem;
+}
+
+/* Header */
+.header {
+  position: sticky;
+  top: 12px;
+  z-index: 50;
+  background: rgba(11, 19, 43, 0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-glow);
+  margin-bottom: 1.25rem;
+}
+
+.h-left { display: flex; align-items: center; gap: 12px; }
+.h-avatar {
+  width: 42px;
+  height: 42px;
+  background: var(--primary-gradient);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 1.15rem;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(67, 97, 238, 0.4);
+}
+.h-title { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.01em; }
+.h-sub { font-size: 0.75rem; color: var(--text-sub); display: flex; align-items: center; gap: 6px; }
+
+.sync-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted); transition: background 0.3s; }
+.refresh-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-main);
+  transition: all 0.2s ease;
+}
+.refresh-btn:hover { background: rgba(255, 255, 255, 0.1); }
+.refresh-btn:active { transform: scale(0.92); }
+.refresh-btn.spin .material-symbols-rounded { animation: spin 0.8s linear infinite; }
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 8px;
+  background: rgba(28, 37, 65, 0.4);
+  padding: 6px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  margin-bottom: 1.25rem;
+}
+.tab {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text-sub);
+  cursor: pointer;
+  position: relative;
+  transition: all 0.25s ease;
+}
+.tab.active {
+  background: var(--primary-gradient);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(67, 97, 238, 0.35);
+}
+.tab .badge {
+  position: absolute;
+  top: 6px;
+  left: 10px;
+  background: var(--warning);
+  color: #000;
+  font-size: 0.65rem;
+  font-weight: 800;
+  border-radius: 99px;
+  padding: 1px 7px;
+}
+
+/* Cards List */
+.list { display: flex; flex-direction: column; gap: 14px; }
+.empty {
+  text-align: center;
+  padding: 4rem 1rem;
+  color: var(--text-muted);
+  background: var(--bg-card);
+  border: 1px dashed var(--border-light);
+  border-radius: var(--radius-lg);
+}
+.empty .material-symbols-rounded { font-size: 3rem; margin-bottom: 0.5rem; opacity: 0.5; }
+
+.card {
+  background: var(--bg-card);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-glow);
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+.card:hover { border-color: var(--border-accent); }
+.card.approved { border-right: 4px solid var(--success); }
+.card.cancelled { border-right: 4px solid var(--danger); opacity: 0.6; }
+
+.c-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 0.8rem; }
+.c-name { font-size: 1.1rem; font-weight: 800; color: var(--text-main); }
+.c-meta { font-size: 0.78rem; color: var(--text-sub); margin-top: 2px; }
+
+.c-status { font-size: 0.7rem; font-weight: 700; padding: 4px 10px; border-radius: 99px; display: inline-flex; align-items: center; gap: 4px; }
+.c-status.pending { background: var(--warning-bg); color: var(--warning); border: 1px solid rgba(255,183,3,0.2); }
+.c-status.approved { background: var(--success-bg); color: var(--success); border: 1px solid rgba(16,185,129,0.2); }
+.c-status.cancelled { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(255,0,110,0.2); }
+
+.c-info-grid { display: grid; gap: 8px; margin: 0.8rem 0; font-size: 0.88rem; color: var(--text-sub); }
+.c-row { display: flex; align-items: center; gap: 8px; }
+.c-row .material-symbols-rounded { font-size: 18px; color: var(--primary); }
+
+.c-notes {
+  margin-top: 8px;
+  background: rgba(11, 19, 43, 0.6);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.82rem;
+  color: var(--text-sub);
+}
+
+.c-actions { display: flex; gap: 10px; margin-top: 1.1rem; }
+.btn {
+  flex: 1;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: 'Heebo', sans-serif;
+  transition: all 0.2s ease;
+}
+.btn:active { transform: scale(0.96); }
+
+.btn-approve { background: var(--success); color: #fff; box-shadow: 0 4px 12px rgba(16,185,129,0.25); }
+.btn-approve:hover { background: #059669; }
+
+.btn-reject { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(255,0,110,0.3); }
+.btn-reject:hover { background: rgba(255,0,110,0.25); }
+
+.btn-wa { background: #25D366; color: #fff; box-shadow: 0 4px 12px rgba(37,211,102,0.2); }
+.btn-wa:hover { background: #1da851; }
+
+.btn-mail { background: var(--primary-gradient); color: #fff; }
+
+.msg-box {
+  margin-top: 1rem;
+  background: rgba(11, 19, 43, 0.7);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+}
+.msg-box textarea {
+  width: 100%;
+  background: rgba(28, 37, 65, 0.8);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  font-family: 'Heebo', sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  resize: vertical;
+  min-height: 80px;
+  outline: none;
+}
+.msg-box textarea:focus { border-color: var(--primary); }
+.email-inp {
+  width: 100%;
+  background: rgba(28, 37, 65, 0.8);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  font-size: 0.85rem;
+  margin-top: 8px;
+  font-family: 'Heebo', sans-serif;
+  color: var(--text-main);
+  outline: none;
+}
+.email-inp:focus { border-color: var(--primary); }
+.send-row { display: flex; gap: 8px; margin-top: 10px; }
+
+/* Toast Notification */
+#toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(40px);
+  background: rgba(28, 37, 65, 0.95);
+  border: 1px solid var(--border-accent);
+  backdrop-filter: blur(12px);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 99px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 9999;
+  pointer-events: none;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div id="toast"></div>
+
+<!-- MAIN CONTAINER -->
+<div id="app">
+ <div class="header">
+  <div class="h-left">
+   <div class="h-avatar">C</div>
+   <div>
+    <div class="h-title">אישור בקשות</div>
+    <div class="h-sub">
+      <span class="sync-dot" id="sync-dot"></span> 
+      <span id="sync-text">מתחבר...</span>
+    </div>
+   </div>
+  </div>
+  <button class="refresh-btn" id="refresh-btn" onclick="loadAll(true)" title="רענון">
+   <span class="material-symbols-rounded">refresh</span>
+  </button>
+ </div>
+
+ <div class="tabs">
+  <div class="tab active" id="tab-pending" onclick="setTab('pending')">
+    ממתינות <span class="badge" id="pending-badge" style="display:none"></span>
+  </div>
+  <div class="tab" id="tab-all" onclick="setTab('all')">כל הבקשות</div>
+ </div>
+
+ <div class="list" id="list"></div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════
+// DATA & SHEETS INTEGRATION
+// ══════════════════════════════════════════════════════
+const SHEETS_URL  = 'https://script.google.com/macros/s/AKfycbyprj2wfR4gOeSnzEddcFoQ1tWOlDnzo9IAd9JR1JHe58mwPTi_jVUOPADzRFUZl7QA/exec';
+const SHEETS_PASS = 'classflow2024';
+
+const STORE = {
+ getItem(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } },
+ setItem(k,v){ try{ localStorage.setItem(k,String(v)); }catch(e){} }
+};
+
+async function DB_post(payload){
+ payload.pass = SHEETS_PASS;
+ try{
+  const res = await fetch(SHEETS_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)});
+  return await res.json().catch(()=>({ok:true}));
+ }catch(e){
+  try{ await fetch(SHEETS_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)}); return {ok:true,fallback:true}; }
+  catch(e2){ return {ok:false,error:e2.message}; }
+ }
+}
+
+async function DB_get(sheet){
+ const controller = new AbortController();
+ const timer = setTimeout(()=>controller.abort(),9000);
+ try{
+  const res = await fetch(SHEETS_URL+'?sheet='+encodeURIComponent(sheet)+'&pass='+encodeURIComponent(SHEETS_PASS)+'&t='+Date.now(),{signal:controller.signal});
+  clearTimeout(timer);
+  if(!res.ok) return null;
+  const data = await res.json();
+  return Array.isArray(data)?data:null;
+ }catch(e){ clearTimeout(timer); return null; }
+}
+
+function rowToObj(headers,row){
+ const HEADER_MAP={language:'lang',lessons_bought:'bought',start_date:'startDate',package_id:'packageId',
+  is_active:'isActive',late_count:'lateCount',cancel_count:'cancelCount',created_at:'createdAt',
+  updated_at:'updatedAt',student_id:'studentId',student_name:'studentName',teacher_notes:'teacherNotes',
+  booking_id:'bookingId',free_text:'freeText'};
+ const obj={};
+ headers.forEach((h,i)=>{ const key=HEADER_MAP[h]||h; obj[key]=row[i]??''; });
+ return obj;
+}
+
+function normalizeStatus(status){
+ const s=String(status||'pending').trim();
+ if(['pending','approved','cancelled'].includes(s)) return s;
+ if(['ממתין','ממתינה','בהמתנה','מחכה','منتظر','معلق'].includes(s)) return 'pending';
+ if(['מאושר','אושר','מאושרת','موافق','تمت الموافقة'].includes(s)) return 'approved';
+ if(['בוטל','מבוטל','נדחה','בוטלה','ملغي','مرفوض'].includes(s)) return 'cancelled';
+ return 'pending';
+}
+
+function escHtml(v){ return String(v??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+function escJs(v){ return String(v??'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\r?\n/g,' '); }
+function normPhone(p){ return p?String(p).replace(/\D/g,''):''; }
+function samePhone(a,b){ if(!a||!b) return false; return normPhone(a).slice(-9)===normPhone(b).slice(-9); }
+
+function fmtDate(d){ 
+ if(!d) return ''; 
+ const dt=new Date(d); 
+ if(isNaN(dt)) return d; 
+ return dt.getDate()+'/'+(dt.getMonth()+1)+'/'+dt.getFullYear(); 
+}
+
+// دالة إصلاح تنسيق الوقت لعرض HH:MM فقط
+function fmtTime(t){
+ if(!t) return '';
+ const str = String(t).trim();
+ if (str.includes('T')) {
+  const dt = new Date(str);
+  if (!isNaN(dt)) {
+   const hh = String(dt.getHours()).padStart(2, '0');
+   const mm = String(dt.getMinutes()).padStart(2, '0');
+   return `${hh}:${mm}`;
+  }
+ }
+ const match = str.match(/(\d{1,2}):(\d{2})/);
+ if (match) {
+  return `${match[1].padStart(2, '0')}:${match[2]}`;
+ }
+ return str;
+}
+
+const DEFAULT_MSG_TEMPLATES = {
+ he: `שלום {name} 😊\nהשיעור שלך אושר ✅\n📅 תאריך: {date}\n🕐 שעה: {time}\nנתראה בקרוב!`,
+ ar: `مرحباً {name} 😊\nتم تأكيد درسك ✅\n📅 التاريخ: {date}\n🕐 الساعة: {time}\nأراك قريباً!`
+};
+
+let msgSettings = { enabled:true, lang:'both', templateHe:DEFAULT_MSG_TEMPLATES.he, templateAr:DEFAULT_MSG_TEMPLATES.ar };
+let teacherProfile = {};
+let avDefaults = { lessonDuration:60, defaultRate:150 };
+
+function fillTemplate(tpl,name,date,time){
+ return String(tpl||'').replace(/\{name\}/g,name||'').replace(/\{date\}/g,date||'').replace(/\{time\}/g,time||'');
+}
+
+function buildApprovalMessage(name,dateStr,timeStr){
+ const formattedTime = fmtTime(timeStr);
+ const heMsg=fillTemplate(msgSettings.templateHe,name,dateStr,formattedTime);
+ const arMsg=fillTemplate(msgSettings.templateAr,name,dateStr,formattedTime);
+ if(msgSettings.lang==='he') return heMsg;
+ if(msgSettings.lang==='ar') return arMsg;
+ return heMsg+'\n\n'+arMsg;
+}
+
+// ══════════════════════════════════════════════════════
+// APP CONTROLLER
+// ══════════════════════════════════════════════════════
+let bookings=[], students=[], lessons=[];
+let currentTab='pending';
+
+function setSyncStatus(state){
+ const dot=document.getElementById('sync-dot'), txt=document.getElementById('sync-text');
+ const map={ok:{c:'#10B981',t:'מסונכרן'},syncing:{c:'#FFB703',t:'מסנכרן...'},offline:{c:'#FF006E',t:'אין חיבור'}};
+ const s=map[state]||map.ok;
+ dot.style.background=s.c; txt.textContent=s.t;
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+ initApp();
+});
+
+async function initApp(){
+ await loadAll(false);
+ setInterval(()=>loadAll(false), 30000);
+}
+
+async function loadAll(manual){
+ const btn=document.getElementById('refresh-btn');
+ if(manual && btn) btn.classList.add('spin');
+ setSyncStatus('syncing');
+ try{
+  const [bkgRows, studentRows, lessonRows, jsonRows] = await Promise.all([
+   DB_get('Bookings'), DB_get('Students'), DB_get('Lessons'), DB_get('JsonStore')
+  ]);
+
+  if(bkgRows && bkgRows.length>1){
+   const h=bkgRows[0];
+   bookings = bkgRows.slice(1).filter(r=>r[0]!=='').map(r=>{
+    const o=rowToObj(h,r); o.status=normalizeStatus(o.status); return o;
+   });
+  } else bookings=[];
+
+  if(studentRows && studentRows.length>1){
+   const h=studentRows[0];
+   students = studentRows.slice(1).filter(r=>r[0]!=='').map(r=>rowToObj(h,r));
+  } else students=[];
+
+  if(lessonRows && lessonRows.length>1){
+   const h=lessonRows[0];
+   lessons = lessonRows.slice(1).filter(r=>r[0]!=='').map(r=>rowToObj(h,r));
+  } else lessons=[];
+
+  if(jsonRows && jsonRows.length>1){
+   const store={};
+   jsonRows.slice(1).forEach(r=>{ if(r[0]){ try{ store[r[0]]=JSON.parse(r[1]||'null'); }catch(e){} } });
+   if(store.msgSettings) msgSettings={...msgSettings,...store.msgSettings};
+   if(store.teacherProfile) teacherProfile=store.teacherProfile;
+   if(store.availability){ avDefaults.lessonDuration=store.availability.lessonDuration||60; avDefaults.defaultRate=store.availability.defaultRate||150; }
+  }
+
+  setSyncStatus('ok');
+ }catch(e){
+  setSyncStatus('offline');
+  toast('⚠️ שגיאת חיבור');
+ }
+ if(manual && btn) setTimeout(()=>btn.classList.remove('spin'),400);
+ renderList();
+}
+
+function setTab(t){
+ currentTab=t;
+ document.getElementById('tab-pending').classList.toggle('active',t==='pending');
+ document.getElementById('tab-all').classList.toggle('active',t==='all');
+ renderList();
+}
+
+function renderList(){
+ const pending = bookings.filter(b=>b.status==='pending');
+ const badge = document.getElementById('pending-badge');
+ if(pending.length>0){ badge.style.display='inline-block'; badge.textContent=pending.length; } else badge.style.display='none';
+
+ const rows = (currentTab==='pending' ? pending : [...bookings])
+  .sort((a,b)=> (a.date+a.time).localeCompare(b.date+b.time));
+
+ const list=document.getElementById('list');
+ if(!rows.length){
+  list.innerHTML=`<div class="empty fade-in">
+   <span class="material-symbols-rounded">check_circle</span>
+   <p>אין בקשות ${currentTab==='pending'?'ממתינות':''} כרגע</p>
+  </div>`;
+  return;
+ }
+
+ list.innerHTML = rows.map(b=>{
+  const statusLabel = b.status==='approved'?'מאושר':b.status==='pending'?'ממתין':'בוטל';
+  const cleanTime = fmtTime(b.time);
+  return `
+  <div class="card fade-in ${b.status}" id="card-${escHtml(b.id)}">
+   <div class="c-top">
+    <div>
+     <div class="c-name">${escHtml(b.name)}</div>
+     <div class="c-meta">${escHtml(b.lang||'')}</div>
+    </div>
+    <div class="c-status ${b.status}">${statusLabel}</div>
+   </div>
+   <div class="c-info-grid">
+     <div class="c-row"><span class="material-symbols-rounded">calendar_month</span> ${fmtDate(b.date)} · ${escHtml(cleanTime)}</div>
+     ${b.phone?`<div class="c-row"><span class="material-symbols-rounded">call</span> ${escHtml(b.phone)}</div>`:''}
+   </div>
+   ${b.notes?`<div class="c-notes">${escHtml(b.notes)}</div>`:''}
+   ${b.status==='pending' ? `
+   <div class="c-actions">
+    <button class="btn btn-approve" onclick="approveBooking('${escJs(b.id)}')">
+     <span class="material-symbols-rounded">check</span> موافقة
+    </button>
+    <button class="btn btn-reject" onclick="rejectBooking('${escJs(b.id)}')">
+     <span class="material-symbols-rounded">close</span> رفض
+    </button>
+   </div>` : ''}
+   ${b.status==='approved' ? `
+   <div class="msg-box" id="msgbox-${escHtml(b.id)}">
+    <textarea id="msgtext-${escHtml(b.id)}">${escHtml(buildApprovalMessage(b.name,fmtDate(b.date),b.time))}</textarea>
+    <input class="email-inp" type="email" id="email-${escHtml(b.id)}" value="${escHtml(b.email||'')}" placeholder="אימייל התלמיד (אופציונלי)">
+    <div class="send-row">
+     <button class="btn btn-wa" ${b.phone?'':'disabled'} onclick="sendWA('${escJs(b.id)}','${escJs(b.phone)}')">
+      <span class="material-symbols-rounded">chat</span> واتساب
+     </button>
+     <button class="btn btn-mail" onclick="sendMail('${escJs(b.id)}','${escJs(b.name)}')">
+      <span class="material-symbols-rounded">mail</span> إيميل
+     </button>
+    </div>
+   </div>` : ''}
+  </div>`;
+ }).join('');
+}
+
+// ══════════════════════════════════════════════════════
+// ACTIONS
+// ══════════════════════════════════════════════════════
+async function approveBooking(id){
+ const b = bookings.find(x=>String(x.id)===String(id));
+ if(!b) return;
+ b.status='approved';
+ renderList();
+ toast('מאשר...');
+
+ await DB_post({action:'updateBookingStatus', sheet:'Bookings', id:String(id), status:'approved'});
+
+ let s = students.find(x=>samePhone(x.phone,b.phone));
+ if(!s){
+  const maxSid = students.reduce((m,x)=>Math.max(m,parseInt(x.id)||0),0);
+  s = { id:maxSid+1, name:b.name, phone:b.phone||'', lang:b.lang||'', level:'מתחיל',
+        rate:avDefaults.defaultRate||150, bought:0, notes:'', isActive:true,
+        lateCount:0, cancelCount:0, startDate:new Date().toISOString().slice(0,10),
+        createdAt:new Date().toISOString() };
+  students.push(s);
+  DB_post({action:'upsert', sheet:'Students',
+   row:[s.id,s.name,s.phone,s.lang,s.level,s.rate,s.bought,s.notes,'','',s.startDate,'','true',0,0,s.createdAt]}).catch(()=>{});
+ }
+
+ if(!lessons.find(l=>String(l.bookingId)===String(id))){
+  const maxLid = lessons.reduce((m,x)=>Math.max(m,parseInt(x.id)||0),0);
+  const l = { id:maxLid+1, studentId:s.id, studentName:s.name, lang:b.lang||'',
+              date:b.date, time:fmtTime(b.time), price:s.rate||avDefaults.defaultRate||150,
+              paid:false, status:'approved', bookingId:String(id), createdAt:new Date().toISOString() };
+  lessons.push(l);
+  DB_post({action:'upsert', sheet:'Lessons',
+   row:[l.id,l.studentId,l.studentName,l.lang,l.date,l.time,l.price,'false','approved','','','','',
+        '','',l.bookingId,l.createdAt]}).catch(()=>{});
+ }
+
+ toast('✅ אושר · הודעת אישור מוכנה לשליחה');
+ renderList();
+}
+
+async function rejectBooking(id){
+ const b = bookings.find(x=>String(x.id)===String(id));
+ if(!b) return;
+ b.status='cancelled';
+ renderList();
+ await DB_post({action:'updateBookingStatus', sheet:'Bookings', id:String(id), status:'cancelled'});
+ toast('הבקשה נדחתה');
+}
+
+function sendWA(id,phone){
+ if(!phone) return;
+ const msg = document.getElementById('msgtext-'+id)?.value || '';
+ const waPhone = '972'+normPhone(phone).slice(-9);
+ window.open('https://api.whatsapp.com/send?phone='+waPhone+'&text='+encodeURIComponent(msg),'_blank');
+}
+
+async function sendMail(id,name){
+ const emailInp = document.getElementById('email-'+id);
+ const email = emailInp?.value.trim();
+ if(!email){ toast('הכנס כתובת אימייל תחילה'); return; }
+ const msg = document.getElementById('msgtext-'+id)?.value || '';
+ const subject = 'אישור שיעור — '+name;
+ toast('שולח אימייל...');
+ const res = await DB_post({action:'sendApprovalEmail', id:String(id), email, subject, message:msg});
+ if(res && res.ok){
+  toast('✅ נשלח אימייל אישור');
+  const b = bookings.find(x=>String(x.id)===String(id));
+  if(b) b.email = email;
+ } else {
+  toast('⚠️ فشل إرسال الإيميل — تأكد من الاتصال وحاول مجددًا');
+ }
+}
+
+let _t;
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(_t); _t=setTimeout(()=>t.classList.remove('show'),2400); }
+</script>
+</body>
+</html>
